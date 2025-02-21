@@ -55,7 +55,7 @@ st.set_page_config(page_title="BFHL API & UI", layout="centered")
 st.title("BFHL Data Processor")
 
 st.subheader("Test the API")
-st.write("### Submit JSON Data to `/bfhl` Endpoint")
+st.write("### Submit JSON Data")
 st.code('{"data": ["A", "1", "B", "2"]}', language="json")
 
 # User input field

@@ -1,16 +1,14 @@
 import streamlit as st
 import json
 
-# Set up Streamlit page configuration
-st.set_page_config(page_title="Data Processor", layout="centered")
-
-# Page title
-st.title("BHFL: UTKARSH MAHAJAN")
-
-# Input field for JSON data
+st.set_page_config(page_title="BFHL Data Processor", layout="centered")
+st.title("BFHL Challenge - Data Processor")
 st.write("Enter a valid JSON object in the format:")
 st.code('{"data": ["A", "1", "B", "2"]}', language="json")
 
+st.markdown("### API Endpoint: `/bfhl`")
+
+# User input field
 user_input = st.text_area("Input JSON", "")
 
 # Process button
@@ -29,10 +27,10 @@ if st.button("Process"):
             alphabets = [item for item in data_list if item.isalpha()]
             highest_alphabet = [max(alphabets, key=str.upper)] if alphabets else []
 
-            # Display results
+            # Simulated API response for `/bfhl`
             st.success("Processing Complete!")
             result = {
-                "status": "Success",
+                "is_success": True,
                 "user_id": "utkarsh_mahajan_28082004",
                 "email": "22bda70022@cuchd.in",
                 "roll_number": "22BDA70022",
@@ -40,6 +38,8 @@ if st.button("Process"):
                 "alphabets": alphabets,
                 "highest_alphabet": highest_alphabet
             }
+
+            # Display API response
             st.json(result)
 
     except json.JSONDecodeError:

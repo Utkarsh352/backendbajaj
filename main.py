@@ -1,8 +1,13 @@
 import streamlit as st
 import json
 
+# Set up Streamlit page configuration
 st.set_page_config(page_title="Data Processor", layout="centered")
-st.title("Data Processor: Numbers & Alphabets Separator")
+
+# Page title
+st.title("BHFL: UTKARSH MAHAJAN")
+
+# Input field for JSON data
 st.write("Enter a valid JSON object in the format:")
 st.code('{"data": ["A", "1", "B", "2"]}', language="json")
 

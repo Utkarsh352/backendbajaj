@@ -1,47 +1,71 @@
 import streamlit as st
-import json
+from flask import Flask, request, jsonify
+from threading import Thread
 
-st.set_page_config(page_title="BFHL Data Processor", layout="centered")
-st.title("BFHL Challenge - Data Processor")
-st.write("Enter a valid JSON object in the format:")
-st.code('{"data": ["A", "1", "B", "2"]}', language="json")
+# Initialize Flask App
+flask_app = Flask(__name__)
 
-st.markdown("### API Endpoint: `/bfhl`")
-
-# User input field
-user_input = st.text_area("Input JSON", "")
-
-# Process button
-if st.button("Process"):
+# API Endpoint at /bfhl
+@flask_app.route("/bfhl", methods=["POST"])
+def process_data():
     try:
-        # Load user input as JSON
-        parsed_data = json.loads(user_input)
+        # Get JSON input
+        request_data = request.get_json()
+        if not request_data or "data" not in request_data or not isinstance(request_data["data"], list):
+            return jsonify({"is_success": False, "message": "Invalid JSON format"}), 400
 
-        # Validate format
-        if not isinstance(parsed_data, dict) or "data" not in parsed_data or not isinstance(parsed_data["data"], list):
-            st.error("Invalid JSON format. Ensure it follows the structure: { \"data\": [\"A\", \"1\", \"B\", \"2\"] }")
+        data_list = request_data["data"]
+
+        # Separate numbers and alphabets
+        numbers = [item for item in data_list if item.isdigit()]
+        alphabets = [item for item in data_list if item.isalpha()]
+        highest_alphabet = [max(alphabets, key=str.upper)] if alphabets else []
+
+        # Create response
+        response = {
+            "is_success": True,
+            "user_id": "utkarsh_mahajan_28082004",
+            "email": "22bda70022@cuchd.in",
+            "roll_number": "22BDA70022",
+            "numbers": numbers,
+            "alphabets": alphabets,
+            "highest_alphabet": highest_alphabet
+        }
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"is_success": False, "message": str(e)}), 500
+
+# Run Flask in a separate thread
+def run_flask():
+    flask_app.run(port=8000, debug=False, use_reloader=False)
+
+# Start Flask in a background thread
+flask_thread = Thread(target=run_flask)
+flask_thread.daemon = True
+flask_thread.start()
+
+# Streamlit UI
+st.set_page_config(page_title="BFHL API & UI", layout="centered")
+st.title("BFHL Data Processor")
+
+st.write("### API Endpoint Running at: `/bfhl`")
+st.code("POST http://127.0.0.1:8000/bfhl", language="http")
+
+st.subheader("Test the API")
+user_input = st.text_area("Enter JSON data (Example: {\"data\": [\"A\", \"1\", \"B\", \"2\"]})")
+
+if st.button("Submit Request"):
+    import requests
+    try:
+        headers = {"Content-Type": "application/json"}
+        response = requests.post("http://127.0.0.1:8000/bfhl", json=eval(user_input), headers=headers)
+
+        if response.status_code == 200:
+            st.success("API Response:")
+            st.json(response.json())
         else:
-            # Extract values
-            data_list = parsed_data["data"]
-            numbers = [item for item in data_list if item.isdigit()]
-            alphabets = [item for item in data_list if item.isalpha()]
-            highest_alphabet = [max(alphabets, key=str.upper)] if alphabets else []
+            st.error(f"Error {response.status_code}: {response.text}")
 
-            # Simulated API response for `/bfhl`
-            st.success("Processing Complete!")
-            result = {
-                "is_success": True,
-                "user_id": "utkarsh_mahajan_28082004",
-                "email": "22bda70022@cuchd.in",
-                "roll_number": "22BDA70022",
-                "numbers": numbers,
-                "alphabets": alphabets,
-                "highest_alphabet": highest_alphabet
-            }
-
-            # Display API response
-            st.json(result)
-
-    except json.JSONDecodeError:
-        st.error("Invalid JSON format. Please check your input.")
-
+    except Exception as e:
+        st.error(f"Invalid Input: {e}")
